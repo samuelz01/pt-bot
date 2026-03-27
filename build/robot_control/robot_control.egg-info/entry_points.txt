@@ -1,0 +1,5 @@
+[console_scripts]
+commander_node = robot_control.commander_node:main
+controller_node = robot_control.controller_node:main
+line_follower_node = robot_control.line_follower_node:main
+monitor_node = robot_control.monitor_node:main

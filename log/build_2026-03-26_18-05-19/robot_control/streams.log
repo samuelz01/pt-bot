@@ -1,0 +1,27 @@
+[3.931s] Invoking command in '/home/saul_rovelo/Documentos/Ros/src/robot_control': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/saul_rovelo/Documentos/Ros/build/robot_control/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/saul_rovelo/Documentos/Ros/install/robot_control/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/robot_control build --build-base /home/saul_rovelo/Documentos/Ros/build/robot_control/build install --record /home/saul_rovelo/Documentos/Ros/build/robot_control/install.log --single-version-externally-managed install_data
+[5.269s] running egg_info
+[5.365s] writing ../../build/robot_control/robot_control.egg-info/PKG-INFO
+[5.366s] writing dependency_links to ../../build/robot_control/robot_control.egg-info/dependency_links.txt
+[5.367s] writing entry points to ../../build/robot_control/robot_control.egg-info/entry_points.txt
+[5.367s] writing requirements to ../../build/robot_control/robot_control.egg-info/requires.txt
+[5.368s] writing top-level names to ../../build/robot_control/robot_control.egg-info/top_level.txt
+[5.569s] reading manifest file '../../build/robot_control/robot_control.egg-info/SOURCES.txt'
+[5.573s] writing manifest file '../../build/robot_control/robot_control.egg-info/SOURCES.txt'
+[5.575s] running build
+[5.576s] running build_py
+[5.576s] copying robot_control/line_follower_node.py -> /home/saul_rovelo/Documentos/Ros/build/robot_control/build/lib/robot_control
+[5.577s] running install
+[5.609s] running install_lib
+[5.720s] copying /home/saul_rovelo/Documentos/Ros/build/robot_control/build/lib/robot_control/line_follower_node.py -> /home/saul_rovelo/Documentos/Ros/install/robot_control/lib/python3.12/site-packages/robot_control
+[5.723s] byte-compiling /home/saul_rovelo/Documentos/Ros/install/robot_control/lib/python3.12/site-packages/robot_control/line_follower_node.py to line_follower_node.cpython-312.pyc
+[5.729s] running install_data
+[5.730s] running install_egg_info
+[5.848s] removing '/home/saul_rovelo/Documentos/Ros/install/robot_control/lib/python3.12/site-packages/robot_control-0.0.0-py3.12.egg-info' (and everything under it)
+[5.850s] Copying ../../build/robot_control/robot_control.egg-info to /home/saul_rovelo/Documentos/Ros/install/robot_control/lib/python3.12/site-packages/robot_control-0.0.0-py3.12.egg-info
+[5.854s] running install_scripts
+[6.591s] Installing commander_node script to /home/saul_rovelo/Documentos/Ros/install/robot_control/lib/robot_control
+[6.594s] Installing controller_node script to /home/saul_rovelo/Documentos/Ros/install/robot_control/lib/robot_control
+[6.595s] Installing line_follower_node script to /home/saul_rovelo/Documentos/Ros/install/robot_control/lib/robot_control
+[6.596s] Installing monitor_node script to /home/saul_rovelo/Documentos/Ros/install/robot_control/lib/robot_control
+[6.596s] writing list of installed files to '/home/saul_rovelo/Documentos/Ros/build/robot_control/install.log'
+[6.761s] Invoked command in '/home/saul_rovelo/Documentos/Ros/src/robot_control' returned '0': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/saul_rovelo/Documentos/Ros/build/robot_control/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/saul_rovelo/Documentos/Ros/install/robot_control/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/robot_control build --build-base /home/saul_rovelo/Documentos/Ros/build/robot_control/build install --record /home/saul_rovelo/Documentos/Ros/build/robot_control/install.log --single-version-externally-managed install_data
