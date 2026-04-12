@@ -7,42 +7,47 @@ from launch_ros.actions import Node
 import xacro
 
 def generate_launch_description():
-    pkg_name = 'robot_control'
-    pkg_share = get_package_share_directory(pkg_name)
-    
-    xacro_file = os.path.join(pkg_share, 'urdf', 'tricycle.xacro')
-    robot_description_config = xacro.process_file(xacro_file)
-    robot_desc = robot_description_config.toxml()
-    
-    node_robot_state_publisher = Node(
+    # ── Rutas del paquete ───────────────────────────────────────────────
+    nombre_paquete = 'robot_control'
+    dir_paquete    = get_package_share_directory(nombre_paquete)
+
+    # Procesar el modelo URDF/Xacro del robot
+    archivo_xacro      = os.path.join(dir_paquete, 'urdf', 'tricycle.xacro')
+    config_descripcion = xacro.process_file(archivo_xacro)
+    descripcion_robot  = config_descripcion.toxml()
+
+    # ── Nodo: Publicador del estado del robot (cinemática) ──────────────
+    nodo_estado_robot = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
         output='screen',
-        parameters=[{'robot_description': robot_desc}]
+        parameters=[{'robot_description': descripcion_robot}]
     )
-    
-    ros_gz_sim_share = get_package_share_directory('ros_gz_sim')
-    gz_launch_file = os.path.join(ros_gz_sim_share, 'launch', 'gz_sim.launch.py')
-    
-    # 4. Incluir el laucher del "Nuevo Gazebo" y cargar nuestro circuito personalizado
-    world_file = os.path.join(pkg_share, 'worlds', 'line_follower.sdf')
-    gazebo = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(gz_launch_file),
-        launch_arguments={'gz_args': f'-r {world_file}'}.items(),
+
+    # ── Nodo: Gazebo Harmonic con el mundo personalizado ────────────────
+    dir_gz_sim          = get_package_share_directory('ros_gz_sim')
+    archivo_lanzador_gz = os.path.join(dir_gz_sim, 'launch', 'gz_sim.launch.py')
+    archivo_mundo       = os.path.join(dir_paquete, 'worlds', 'line_follower.sdf')
+
+    simulador = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(archivo_lanzador_gz),
+        launch_arguments={'gz_args': f'-r {archivo_mundo}'}.items(),
     )
-    
-    spawn_entity = Node(
+
+    # ── Nodo: Generar el robot en la simulación ──────────────────────────
+    # Caída segura desde 0.1 m para que la física no explote al nacer
+    crear_robot = Node(
         package='ros_gz_sim',
         executable='create',
         arguments=['-topic', 'robot_description',
                    '-name', 'tricycle_bot',
-                   '-z', '0.1'], # Caída segura sin forzar banderas conflictivas X/Y
+                   '-z', '0.1'],
         output='screen'
     )
 
-    # 5. Puente de variables entre ROS 2 y Gazebo Harmonic
-    # Toma mensajes Twist de ROS 2 y los traduce al formato de red interna de Gazebo
-    bridge = Node(
+    # ── Nodo: Puente de mensajes ROS 2 ↔ Gazebo ─────────────────────────
+    # Traduce Twist (/cmd_vel) e Image (/camera/image_raw) entre ambos mundos
+    puente = Node(
         package='ros_gz_bridge',
         executable='parameter_bridge',
         arguments=[
@@ -51,10 +56,10 @@ def generate_launch_description():
         ],
         output='screen'
     )
-    
+
     return LaunchDescription([
-        node_robot_state_publisher,
-        gazebo,
-        spawn_entity,
-        bridge
+        nodo_estado_robot,
+        simulador,
+        crear_robot,
+        puente
     ])
