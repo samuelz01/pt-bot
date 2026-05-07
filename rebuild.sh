@@ -12,9 +12,9 @@ podman start "$CONTAINER_NAME" 2>/dev/null || true
 podman exec "$CONTAINER_NAME" bash -c '
   set -eo pipefail
   source /opt/ros/jazzy/setup.bash
-  cd /root/ros2_ws
+  cd /root/Ros
   colcon build --packages-select robot_control --symlink-install
   echo ""
   echo "✅ Recompilación completa."
-  echo "   source /root/ros2_ws/install/setup.bash → ya incluido en .bashrc del contenedor"
+  echo "   source /root/Ros/install/setup.bash → ya incluido en .bashrc del contenedor"
 '
