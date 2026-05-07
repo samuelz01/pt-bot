@@ -43,13 +43,20 @@ fig = figure('Name', 'Vision - MATLAB Line Follower', 'NumberTitle', 'off');
 ax = axes(fig);
 disp('Presiona Ctrl+C o cierra la ventana de la figura para detener.');
 
-% --- 3. PARAMETROS DEL CONTROLADOR ---
-vel_lineal_base = 0.25;         % Velocidad maxima hacia adelante (m/s)
-vel_angular_busqueda = 0.6;     % Velocidad de giro cuando pierde la linea (rad/s)
-k_p = 0.018;                    % Ganancia proporcional para el giro
+% --- 3. PARAMETROS DEL CONTROLADOR (Afinados para suavidad) ---
+vel_lineal_base = 0.20;         % Velocidad maxima (conservadora para evitar zig-zag)
+vel_angular_busqueda = 0.5;     % Velocidad de giro cuando pierde la linea (rad/s)
+k_p = 0.012;                    % Ganancia Proporcional (reducida para ser mas suave)
+k_d = 0.005;                    % Ganancia Derivativa (amortigua las oscilaciones)
+zona_muerta = 8;                % Pixeles de tolerancia en el centro donde no gira
+alpha_filtro = 0.6;             % Factor de suavizado exponencial (1=sin filtro, menor=mas suave)
 area_minima_linea = 300;        % Pixeles minimos para considerar que es la linea
 area_minima_meta = 600;         % Pixeles minimos para detectar la meta roja
 umbral_negro = 80;              % Intensidad maxima para considerar un pixel como negro (0-255)
+
+% Variables de estado para el control
+error_previo = 0;
+cx_filtrado = -1;
 
 % --- 4. BUCLE PRINCIPAL ---
 while ishandle(fig)
@@ -102,21 +109,41 @@ while ishandle(fig)
         plot(ax, [centro_pantalla centro_pantalla], [1 size(region,1)], 'b--', 'LineWidth', 2);
         
         if area_linea > area_minima_linea
-            % Centroide calculado manualmente (promedio de posiciones X e Y)
-            cx = mean(columnas);
+            % Centroide crudo (promedio de posiciones X e Y)
+            cx_raw = mean(columnas);
             cy = mean(filas);
             
-            error_pos = cx - centro_pantalla;
+            % 1. Suavizado Exponencial del centroide (Low-pass filter)
+            if cx_filtrado == -1
+                cx_filtrado = cx_raw; % Inicializacion
+            else
+                cx_filtrado = alpha_filtro * cx_raw + (1 - alpha_filtro) * cx_filtrado;
+            end
             
-            % Control Proporcional
-            % Frena un poco linealmente en las curvas muy cerradas
-            msg_twist.linear.x = max(0.05, vel_lineal_base - abs(error_pos) * 0.003);
-            % Gira en proporcion al error
-            msg_twist.angular.z = max(-1.8, min(1.8, -error_pos * k_p));
+            error_pos = cx_filtrado - centro_pantalla;
             
-            % Dibujar centroide de la linea
-            plot(ax, cx, cy, 'r+', 'MarkerSize', 12, 'LineWidth', 3);
-            title(ax, sprintf('Error: %.1f px | Lineal: %.2f m/s | Angular: %.2f rad/s', ...
+            % 2. Zona Muerta (Dead zone) para evitar micro-oscilaciones en rectas
+            if abs(error_pos) < zona_muerta
+                error_pos = 0;
+            end
+            
+            % 3. Calculo Derivativo
+            error_derivativo = error_pos - error_previo;
+            error_previo = error_pos;
+            
+            % 4. Controlador PD (Proporcional-Derivativo)
+            % Frena ligeramente en curvas para no derrapar
+            msg_twist.linear.x = max(0.05, vel_lineal_base - abs(error_pos) * 0.002);
+            
+            % Ecuacion PD: P corrige la posicion, D amortigua la velocidad de acercamiento al centro
+            correccion_angular = -(error_pos * k_p + error_derivativo * k_d);
+            
+            % Saturacion suave (limite maximo de giro a 1.5 rad/s)
+            msg_twist.angular.z = max(-1.5, min(1.5, correccion_angular));
+            
+            % Dibujar centroide suavizado
+            plot(ax, cx_filtrado, cy, 'ro', 'MarkerSize', 10, 'LineWidth', 3);
+            title(ax, sprintf('Err: %.1f px | Lin: %.2f m/s | Ang: %.2f rad/s', ...
                               error_pos, msg_twist.linear.x, msg_twist.angular.z));
         else
             % Linea muy pequeña o no hay -> Buscar
