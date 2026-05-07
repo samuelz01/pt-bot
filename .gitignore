@@ -1,4 +1,37 @@
-# ROS / colcon
+# ── ROS 2 / colcon ───────────────────────────────────────────────────────────
 build/
 install/
 log/
+
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+*.egg
+.eggs/
+
+# ── IDE / editores ────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# ── Variables de entorno / secretos ──────────────────────────────────────────
+.env
+.env.*
+
+# ── Binarios y temporales ─────────────────────────────────────────────────────
+*.o
+*.so
+*.pyc
+*.bag
+*.db
+
+# ── Gazebo / simulación ───────────────────────────────────────────────────────
+*.world.generated
+gz_*.log
