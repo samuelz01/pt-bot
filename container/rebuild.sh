@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # =============================================================================
 # rebuild.sh  – Recompila el workspace dentro del contenedor
-# Uso desde Fedora: bash rebuild.sh
+# Uso desde Fedora: bash container/rebuild.sh
 # =============================================================================
 set -euo pipefail
 

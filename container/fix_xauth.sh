@@ -4,7 +4,7 @@
 #
 # Ejecutar antes de ros2-sim si Gazebo no abre ventana.
 # Agrégalo al inicio de la sesión o ejecútalo manualmente con:
-#   bash ~/Documentos/Ros/fix_xauth.sh
+#   bash ~/Documentos/Ros/container/fix_xauth.sh
 # =============================================================================
 set -euo pipefail
 

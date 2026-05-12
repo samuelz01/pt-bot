@@ -4,7 +4,7 @@
 # Configura un contenedor Podman (Ubuntu 24.04) con ROS 2 Jazzy + Gazebo
 # para el proyecto robot_control en Fedora 44.
 #
-# Uso: bash ros2_jazzy_fedora.sh
+# Uso: bash container/ros2_jazzy_fedora.sh
 # =============================================================================
 set -euo pipefail
 
