@@ -17,6 +17,11 @@ Se ha separado de forma estricta el código fuente, la integración externa y la
 ```text
 ~/Documentos/Ros/
 ├── src/                          # Código fuente ROS 2 (paquete robot_control)
+│   └── robot_control/
+│       ├── launch/               # Launch files de Gazebo
+│       ├── models/nuevo_modelo/  # Robot mecanum integrado (SDF + meshes)
+│       ├── urdf/                 # Modelo funcional original
+│       └── worlds/               # Mundos de simulación
 ├── matlab_integration/           # Control externo con MATLAB
 │   ├── demo_line_follower.m      # MAIN DEMO: Control autónomo
 │   ├── diagnostico_conexion.m    # Herramienta de red DDS
@@ -57,6 +62,19 @@ bash container/rebuild.sh
 2. Host: Abre MATLAB y ejecuta `matlab_integration/demo_line_follower.m`
 
 > **ADVERTENCIA:** ¡No ejecutes el Modo A y el Modo B simultáneamente! Ambos compiten por publicar en `/cmd_vel` y el robot oscilará violentamente.
+
+### Modo C: Nuevo Modelo Mecanum en Gazebo
+El nuevo robot está integrado dentro de `src/robot_control/models/nuevo_modelo/`.
+
+Terminal 1:
+```bash
+podman exec -it ros2_jazzy bash -lc 'export DISPLAY=:0; export XAUTHORITY=/root/.Xauthority; export QT_QPA_PLATFORM=xcb; export QT_X11_NO_MITSHM=1; unset WAYLAND_DISPLAY; source /opt/ros/jazzy/setup.bash; source /root/Ros/install/setup.bash; ros2 launch robot_control sim_mecanum_launch.py'
+```
+
+Terminal 2:
+```bash
+podman exec -it ros2_jazzy bash -lc 'export DISPLAY=:0; export XAUTHORITY=/root/.Xauthority; export QT_QPA_PLATFORM=xcb; export QT_X11_NO_MITSHM=1; unset WAYLAND_DISPLAY; source /opt/ros/jazzy/setup.bash; source /root/Ros/install/setup.bash; ros2 run robot_control line_follower_node'
+```
 
 ## 6. Utilidades del Contenedor (`container/`)
 

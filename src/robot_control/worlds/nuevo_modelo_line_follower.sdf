@@ -1,0 +1,234 @@
+<?xml version="1.0" ?>
+<!-- ============================================================
+     line_follower.sdf
+     Mundo de simulacion para el seguidor de linea.
+     Incluye:
+       - Piso de pasto verde
+       - Pista de concreto claro
+       - Linea negra en forma de L
+       - Meta roja con postes amarillos
+       - Cajas decorativas para referencia visual
+       - Pista lista para insertar el nuevo robot mecanum desde launch
+     ============================================================ -->
+<sdf version="1.8">
+  <world name="line_world">
+
+    <!-- ============================================ -->
+    <!-- Plugins del sistema de simulacion            -->
+    <!-- Estos plugins son necesarios para que        -->
+    <!-- Gazebo pueda simular fisica, sensores,       -->
+    <!-- comandos de usuario y transmitir la escena.  -->
+    <!-- ============================================ -->
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands"/>
+    <!-- Plugin de sensores: habilita camaras y LIDAR virtuales -->
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    <!-- Plugin de contacto: necesario para deteccion de colisiones -->
+    <plugin filename="gz-sim-contact-system" name="gz::sim::systems::Contact">
+    </plugin>
+
+    <!-- ============================================ -->
+    <!-- Configuracion visual de la escena            -->
+    <!-- ============================================ -->
+    <scene>
+      <ambient>0.6 0.6 0.6 1.0</ambient>
+      <background>0.5 0.7 0.9 1.0</background>
+      <shadows>true</shadows>
+      <grid>false</grid>
+    </scene>
+
+    <!-- ============================================ -->
+    <!-- Luz solar (direccional)                      -->
+    <!-- ============================================ -->
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.9 0.9 0.9 1</diffuse>
+      <specular>0.3 0.3 0.3 1</specular>
+      <direction>-0.3 0.3 -0.9</direction>
+    </light>
+
+    <!-- ============================================ -->
+    <!-- 1. Piso de pasto verde (plano infinito)      -->
+    <!-- ============================================ -->
+    <model name="piso_pasto">
+      <static>true</static>
+      <!-- Z negativo minimo para evitar superposicion visual con la pista -->
+      <pose>0 0 -0.002 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>50</mu>
+              </ode>
+            </friction>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry>
+          <material>
+            <!-- Verde pasto opaco -->
+            <ambient>0.26 0.52 0.26 1</ambient>
+            <diffuse>0.26 0.52 0.26 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============================================ -->
+    <!-- 2. Pista de concreto claro (area de carrera) -->
+    <!-- ============================================ -->
+    <!-- Tramo recto horizontal -->
+    <model name="pista_recta">
+      <static>true</static>
+      <pose>2.5 0 -0.001 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>7.0 1.2 0.001</size></box></geometry>
+          <material>
+             <!-- Gris casi blanco para resaltar la linea negra -->
+             <ambient>0.85 0.85 0.85 1</ambient>
+             <diffuse>0.85 0.85 0.85 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Tramo vertical (curva en L) -->
+    <model name="pista_curva">
+      <static>true</static>
+      <pose>5.0 1.5 -0.001 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>1.2 3.0 0.001</size></box></geometry>
+          <material>
+             <ambient>0.85 0.85 0.85 1</ambient>
+             <diffuse>0.85 0.85 0.85 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============================================ -->
+    <!-- 3. Zona de inicio (marca azul bajo el robot) -->
+    <!-- ============================================ -->
+    <model name="zona_inicio">
+      <static>true</static>
+      <pose>0 0 0.0005 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.6 0.6 0.001</size></box></geometry>
+          <material>
+            <!-- Azul electrico visible -->
+            <ambient>0.1 0.6 0.8 1</ambient>
+            <diffuse>0.1 0.6 0.8 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============================================ -->
+    <!-- 4. Linea negra principal del circuito        -->
+    <!-- ============================================ -->
+    <!-- Tramo recto de la linea -->
+    <model name="linea_recta">
+      <static>true</static>
+      <pose>2.5 0 0.001 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>4.9 0.18 0.001</size></box></geometry>
+          <material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.05 0.05 0.05 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Tramo en esquina (forma de L) -->
+    <model name="linea_esquina_L">
+      <static>true</static>
+      <pose>5.0 1.36 0.001 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.18 2.9 0.001</size></box></geometry>
+          <material><ambient>0.05 0.05 0.05 1</ambient><diffuse>0.05 0.05 0.05 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============================================ -->
+    <!-- 5. Decoracion (cajas de referencia visual)   -->
+    <!-- ============================================ -->
+    <model name="caja_roja">
+      <static>true</static>
+      <pose>2.0 1.5 0.25 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.5 0.5 0.5</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>0.5 0.5 0.5</size></box></geometry>
+          <material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="caja_naranja">
+      <static>true</static>
+      <pose>4.0 -1.0 0.25 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.5 0.5 0.5</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>0.5 0.5 0.5</size></box></geometry>
+          <material><ambient>0.9 0.5 0.1 1</ambient><diffuse>0.9 0.5 0.1 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============================================ -->
+    <!-- 6. META: franja roja al final de la pista    -->
+    <!-- ============================================ -->
+    <model name="meta_banda">
+      <static>true</static>
+      <pose>5.0 2.75 0.003 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <!-- Franja roja ancha, perpendicular a la linea -->
+          <geometry><box><size>1.0 0.22 0.001</size></box></geometry>
+          <material>
+            <!-- Rojo puro saturado: facil de detectar con HSV -->
+            <ambient>0.95 0.05 0.05 1</ambient>
+            <diffuse>0.95 0.05 0.05 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Postes decorativos de la meta (amarillos) -->
+    <model name="meta_poste_izq">
+      <static>true</static>
+      <pose>4.4 2.75 0.4 0 0 0</pose>
+      <link name="link">
+        <collision name="col"><geometry><box><size>0.06 0.06 0.8</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>0.06 0.06 0.8</size></box></geometry>
+          <material><ambient>0.95 0.95 0.05 1</ambient><diffuse>0.95 0.95 0.05 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="meta_poste_der">
+      <static>true</static>
+      <pose>5.6 2.75 0.4 0 0 0</pose>
+      <link name="link">
+        <collision name="col"><geometry><box><size>0.06 0.06 0.8</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>0.06 0.06 0.8</size></box></geometry>
+          <material><ambient>0.95 0.95 0.05 1</ambient><diffuse>0.95 0.95 0.05 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>

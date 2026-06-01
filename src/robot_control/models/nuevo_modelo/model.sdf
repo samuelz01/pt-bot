@@ -1,0 +1,555 @@
+<?xml version="1.0" ?>
+<!-- ============================================================
+     models/nuevo_modelo/model.sdf
+     Modelo SDF del robot mecanum con 4 ruedas omnidireccionales,
+     sensor LIDAR (ydlidar_x2l) y camara RGBD (OAK-D).
+     
+     Adaptado para el proyecto terminal de seguidor de linea.
+     Las rutas de los meshes apuntan a model://nuevo_modelo/...
+     ============================================================ -->
+
+<sdf version="1.7" xmlns:ignition="https://ignitionrobotics.org">
+  <model name="mecanum_bot">
+
+    <!-- ============================================ -->
+    <!-- Enlace base (huella en el suelo)             -->
+    <!-- ============================================ -->
+    <link name="base_footprint">
+    </link>
+
+    <!-- ============================================ -->
+    <!-- Enlace principal del chasis                  -->
+    <!-- ============================================ -->
+    <link name="base_link">
+      <self_collide>false</self_collide>
+      <inertial>
+        <pose>-0.0010000044107437 0.0 0.04050000384449959 0.0 0.0 0.0</pose>
+        <mass>5</mass>
+        <inertia>
+          <ixx>0.05</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.05</iyy>
+          <iyz>0</iyz>
+          <izz>0.05</izz>
+        </inertia>
+      </inertial>
+      <!-- Colision del chasis (caja envolvente) -->
+      <collision name ="Cube">
+        <pose>-0.0010000044107437 0.0 0.04050000384449959 0.0 0.0 0.0</pose>
+        <geometry>
+          <box>
+            <size>0.39200000195503235 0.1939999908208847 0.219000001168251038</size>
+          </box>
+        </geometry>
+      </collision>
+      <!-- Visual del chasis: mesh 3D del chasis completo -->
+      <visual name="base_visual">
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://nuevo_modelo/meshes/mecanum_bot_chassis.obj</uri>
+            <scale>1 1 1</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+    <!-- ============================================ -->
+    <!-- Rueda delantera izquierda                    -->
+    <!-- ============================================ -->
+    <link name="front_left_wheel">
+      <self_collide>false</self_collide>
+      <pose>0.125 0.117 -0.041 0 0 0</pose>
+      <inertial>
+        <mass>0.2</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+      <visual name="front_left_wheel_visual">
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://nuevo_modelo/meshes/mecanum_bot_wheel.obj</uri>
+            <scale>1 1 1</scale>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="front_left_wheel_collision">
+        <geometry>
+          <sphere>
+            <radius>0.05</radius>
+          </sphere>
+        </geometry>
+        <!-- Friccion mecanum:
+             mu  = friccion en la direccion del rodillo (fdir1)
+                   Valor bajo permite deslizamiento lateral (movimiento mecanum)
+                   Valor > 0 necesario para que el suelo frene la rotacion por inercia
+                   Con mu=0.0 el robot gira indefinidamente despues de frenar
+             mu2 = friccion perpendicular al rodillo (direccion de rodadura)
+                   Valor alto para buena traccion al avanzar/retroceder -->
+        <surface>
+          <friction>
+            <ode>
+              <mu>0.15</mu>
+              <mu2>2.0</mu2>
+              <slip1>0.0</slip1>
+              <slip2>0.0</slip2>
+              <fdir1 ignition:expressed_in="base_link">1 -1 0</fdir1>
+            </ode>
+          </friction>
+          <contact>
+            <ode>
+              <soft_cfm>0</soft_cfm>
+              <soft_erp>0.2</soft_erp>
+              <kp>1e+5</kp>
+              <kd>1</kd>
+              <max_vel>0.01</max_vel>
+              <min_depth>0.001</min_depth>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
+    </link>
+
+    <!-- ============================================ -->
+    <!-- Rueda trasera izquierda                      -->
+    <!-- ============================================ -->
+    <link name="rear_left_wheel">
+      <self_collide>false</self_collide>
+      <pose>-0.125 0.117 -0.041 0 0 0</pose>
+      <inertial>
+        <mass>0.2</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+      <visual name="rear_left_wheel_visual">
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://nuevo_modelo/meshes/mecanum_bot_wheel.obj</uri>
+            <scale>1 1 1</scale>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="rear_left_wheel_collision">
+        <geometry>
+          <sphere>
+            <radius>0.05</radius>
+          </sphere>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>0.15</mu>
+              <mu2>2.0</mu2>
+              <slip1>0.0</slip1>
+              <slip2>0.0</slip2>
+              <!-- Direccion de friccion opuesta a la delantera (rodillos cruzados) -->
+              <fdir1 ignition:expressed_in="base_link">1 1 0</fdir1>
+            </ode>
+          </friction>
+          <contact>
+            <ode>
+              <soft_cfm>0</soft_cfm>
+              <soft_erp>0.2</soft_erp>
+              <kp>1e+5</kp>
+              <kd>1</kd>
+              <max_vel>0.01</max_vel>
+              <min_depth>0.001</min_depth>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
+    </link>
+
+    <!-- ============================================ -->
+    <!-- Rueda delantera derecha                      -->
+    <!-- ============================================ -->
+    <link name="front_right_wheel">
+      <self_collide>false</self_collide>
+      <pose>0.125 -0.117 -0.041 0 0 0</pose>
+      <inertial>
+        <mass>0.2</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+      <visual name="front_right_wheel_visual">
+        <!-- Rotacion de 180 grados para que el mesh de la rueda
+             quede orientado correctamente en el lado derecho -->
+        <pose>0 0 0 0 0 -3.14</pose>
+        <geometry>
+          <mesh>
+            <uri>model://nuevo_modelo/meshes/mecanum_bot_wheel.obj</uri>
+            <scale>1 1 1</scale>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="front_right_wheel_collision">
+        <geometry>
+          <sphere>
+            <radius>0.05</radius>
+          </sphere>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>0.15</mu>
+              <mu2>2.0</mu2>
+              <slip1>0.0</slip1>
+              <slip2>0.0</slip2>
+              <fdir1 ignition:expressed_in="base_link">1 1 0</fdir1>
+            </ode>
+          </friction>
+          <contact>
+            <ode>
+              <soft_cfm>0</soft_cfm>
+              <soft_erp>0.2</soft_erp>
+              <kp>1e+5</kp>
+              <kd>1</kd>
+              <max_vel>0.01</max_vel>
+              <min_depth>0.001</min_depth>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
+    </link>
+
+    <!-- ============================================ -->
+    <!-- Rueda trasera derecha                        -->
+    <!-- ============================================ -->
+    <link name="rear_right_wheel">
+      <self_collide>false</self_collide>
+      <pose>-0.125 -0.117 -0.041 0 0 0</pose>
+      <inertial>
+        <mass>0.2</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+      <visual name="rear_right_wheel_visual">
+        <pose>0 0 0 0 0 -3.14</pose>
+        <geometry>
+          <mesh>
+            <uri>model://nuevo_modelo/meshes/mecanum_bot_wheel.obj</uri>
+            <scale>1 1 1</scale>
+          </mesh>
+        </geometry>
+      </visual>
+      <collision name="rear_right_wheel_collision">
+        <geometry>
+          <sphere>
+            <radius>0.05</radius>
+          </sphere>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>0.15</mu>
+              <mu2>2.0</mu2>
+              <slip1>0.0</slip1>
+              <slip2>0.0</slip2>
+              <fdir1 ignition:expressed_in="base_link">1 -1 0</fdir1>
+            </ode>
+          </friction>
+          <contact>
+            <ode>
+              <soft_cfm>0</soft_cfm>
+              <soft_erp>0.2</soft_erp>
+              <kp>1e+5</kp>
+              <kd>1</kd>
+              <max_vel>0.01</max_vel>
+              <min_depth>0.001</min_depth>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
+    </link>
+
+    <!-- ============================================ -->
+    <!-- Sensor LIDAR (ydlidar_x2l)                   -->
+    <!-- Montado encima del chasis, ligeramente al    -->
+    <!-- frente. Escanea 360 grados a 8 Hz.           -->
+    <!-- ============================================ -->
+    <link name="base_scan">
+      <pose>0.1 0. 0.1924 0 0 0</pose>
+      <inertial>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0.000</ixy>
+          <ixz>0.000</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0.000</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+        <mass>0.125</mass>
+      </inertial>
+      <collision name="lidar_sensor_collision">
+        <geometry>
+          <box>
+            <size>0.06041127070784569 0.09593304991722107 0.0502999983727932</size>
+          </box>
+        </geometry>
+      </collision>
+      <!-- Visual del LIDAR: mesh 3D del sensor ydlidar -->
+      <visual name="lidar_sensor_visual">
+        <geometry>
+          <mesh>
+            <uri>model://nuevo_modelo/meshes/ydlidar_x2l.obj</uri>
+            <scale>1.0 1.0 1.0</scale>
+          </mesh>
+        </geometry>
+      </visual>
+      <!-- Configuracion del sensor LIDAR en Gazebo -->
+      <sensor name="ydlidar_x2l" type="gpu_lidar">
+        <always_on>true</always_on>
+        <gz_frame_id>base_scan</gz_frame_id>
+        <!-- Topic donde Gazebo publica los datos del LIDAR -->
+        <topic>scan</topic>
+        <update_rate>8</update_rate>
+        <visualize>true</visualize>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>360</samples>
+              <resolution>1.000000</resolution>
+              <min_angle>-3.14</min_angle>
+              <max_angle>3.14</max_angle>
+            </horizontal>
+          </scan>
+          <range>
+            <min>0.08</min>
+            <max>12.0</max>
+            <resolution>0.015000</resolution>
+          </range>
+          <noise>
+            <type>gaussian</type>
+            <mean>0.0</mean>
+            <stddev>0.01</stddev>
+          </noise>
+        </lidar>
+      </sensor>
+    </link>
+
+    <!-- ============================================ -->
+    <!-- Camara RGBD (OAK-D)                          -->
+    <!-- Montada al frente del chasis. Publica        -->
+    <!-- imagen RGB y profundidad.                    -->
+    <!-- Resolucion reducida a 320x240 para           -->
+    <!-- compatibilidad con el nodo seguidor de linea -->
+    <!-- ============================================ -->
+    <link name="oak-d_frame">
+      <pose>0.143 0.0 0.136 0 1.2 0</pose>
+      <inertial>
+        <mass>0.1</mass>
+      </inertial>
+      <collision name="collision">
+        <pose>-0.0165 0.0 -0.01525 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.033 0.11 0.054</size>
+          </box>
+        </geometry>
+      </collision>
+      <!-- Visual de la camara: caja negra representativa -->
+      <visual name="visual">
+        <pose>-0.0165 0.0 -0.01525 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.033 0.11 0.054</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0 0 0 1</ambient>
+          <diffuse>0 0 0 1</diffuse>
+        </material>
+      </visual>
+      <!-- Sensor de camara RGBD (color + profundidad) -->
+      <sensor name="rgbd_camera" type="rgbd_camera">
+        <camera>
+          <horizontal_fov>1.204</horizontal_fov>
+          <image>
+            <!-- Resolucion reducida para procesamiento rapido del seguidor de linea -->
+            <width>320</width>
+            <height>240</height>
+            <format>B8G8R8</format>
+          </image>
+          <clip>
+            <near>0.1</near>
+            <far>100</far>
+          </clip>
+          <depth_camera>
+            <clip>
+              <near>0.012</near>
+              <far>10</far>
+            </clip>
+          </depth_camera>
+          <noise>
+            <type>gaussian</type>
+            <mean>0.0</mean>
+            <stddev>0.01</stddev>
+          </noise>
+        </camera>
+        <always_on>1</always_on>
+        <update_rate>15</update_rate>
+        <visualize>true</visualize>
+        <!-- Topic donde Gazebo publica las imagenes de la camara -->
+        <topic>camera</topic>
+        <enable_metrics>true</enable_metrics>
+        <gz_frame_id>oak_rgb_camera_optical_frame</gz_frame_id>
+      </sensor>
+    </link>
+
+    <!-- ============================================ -->
+    <!-- Articulaciones (joints) de las ruedas        -->
+    <!-- Cada rueda gira libremente alrededor del     -->
+    <!-- eje Y (tipo revolute sin limites).           -->
+    <!-- ============================================ -->
+
+    <!-- Articulacion: rueda delantera izquierda -->
+    <joint name="front_left_wheel_joint" type="revolute">
+      <parent>base_link</parent>
+      <child>front_left_wheel</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-1.79769e+308</lower>
+          <upper>1.79769e+308</upper>
+        </limit>
+      </axis>
+    </joint>
+
+    <!-- Articulacion: rueda trasera izquierda -->
+    <joint name="rear_left_wheel_joint" type="revolute">
+      <parent>base_link</parent>
+      <child>rear_left_wheel</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-1.79769e+308</lower>
+          <upper>1.79769e+308</upper>
+        </limit>
+      </axis>
+    </joint>
+
+    <!-- Articulacion: rueda delantera derecha -->
+    <joint name="front_right_wheel_joint" type="revolute">
+      <parent>base_link</parent>
+      <child>front_right_wheel</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-1.79769e+308</lower>
+          <upper>1.79769e+308</upper>
+        </limit>
+      </axis>
+    </joint>
+
+    <!-- Articulacion: rueda trasera derecha -->
+    <joint name="rear_right_wheel_joint" type="revolute">
+      <parent>base_link</parent>
+      <child>rear_right_wheel</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-1.79769e+308</lower>
+          <upper>1.79769e+308</upper>
+        </limit>
+      </axis>
+    </joint>
+
+    <!-- ============================================ -->
+    <!-- Articulaciones fijas (sensores y base)       -->
+    <!-- ============================================ -->
+
+    <!-- Union fija: sensor LIDAR al chasis -->
+    <joint name="base_scan_joint" type="fixed">
+      <parent>base_link</parent>
+      <child>base_scan</child>
+    </joint>
+
+    <!-- Union fija: base_footprint al chasis (referencia de odometria) -->
+    <joint name="base_link_joint" type="fixed">
+      <parent>base_footprint</parent>
+      <child>base_link</child>
+    </joint>
+
+    <!-- Union fija: camara OAK-D al chasis -->
+    <joint name="base_link_oakd_joint" type="fixed">
+      <parent>base_link</parent>
+      <child>oak-d_frame</child>
+    </joint>
+
+    <!-- ============================================ -->
+    <!-- Plugin: Traccion Mecanum (MecanumDrive)      -->
+    <!-- Convierte comandos Twist (vx, vy, wz) en    -->
+    <!-- velocidades individuales para cada rueda.    -->
+    <!-- ============================================ -->
+    <plugin
+      filename="gz-sim-mecanum-drive-system"
+      name="gz::sim::systems::MecanumDrive">
+      <front_left_joint>front_left_wheel_joint</front_left_joint>
+      <front_right_joint>front_right_wheel_joint</front_right_joint>
+      <back_left_joint>rear_left_wheel_joint</back_left_joint>
+      <back_right_joint>rear_right_wheel_joint</back_right_joint>
+      <wheel_separation>0.234</wheel_separation>
+      <wheelbase>0.25</wheelbase>
+      <wheel_radius>0.048</wheel_radius>
+      <topic>/model/mecanum_bot/cmd_vel</topic>
+      <min_acceleration>-1.0</min_acceleration>
+      <max_acceleration>1.0</max_acceleration>
+      <!-- Cambiamos el topic de odometria del drive para que no haga conflicto -->
+      <odom_topic>odom_kinematics</odom_topic>
+    </plugin>
+
+    <!-- ============================================ -->
+    <!-- Plugin: Odometry Publisher (Ground Truth)    -->
+    <!-- Publica la odometria real basada en la pose  -->
+    <!-- fisica del robot, ya que la odometria de las -->
+    <!-- ruedas mecanum es inexacta por el patinaje.  -->
+    <!-- ============================================ -->
+    <plugin
+      filename="gz-sim-odometry-publisher-system"
+      name="gz::sim::systems::OdometryPublisher">
+      <odom_frame>odom</odom_frame>
+      <robot_base_frame>base_footprint</robot_base_frame>
+      <odom_publish_frequency>50</odom_publish_frequency>
+      <odom_topic>/model/mecanum_bot/odometry</odom_topic>
+      <dimensions>3</dimensions>
+    </plugin>
+
+    <!-- ============================================ -->
+    <!-- Plugin: Publicador de Estados de Juntas      -->
+    <!-- Publica la posicion/velocidad de cada        -->
+    <!-- articulacion para visualizacion en RViz.     -->
+    <!-- ============================================ -->
+    <plugin
+      filename="gz-sim-joint-state-publisher-system"
+      name="gz::sim::systems::JointStatePublisher">
+    </plugin>
+
+  </model>
+</sdf>

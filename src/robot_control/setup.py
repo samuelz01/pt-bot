@@ -4,6 +4,18 @@ from setuptools import find_packages, setup
 
 package_name = 'robot_control'
 
+
+def obtener_archivos_recursivos(directorio_base):
+    archivos_datos = []
+    for raiz, _, archivos in os.walk(directorio_base):
+        if archivos:
+            ruta_relativa = os.path.relpath(raiz, '.')
+            ruta_destino = os.path.join('share', package_name, ruta_relativa)
+            lista_archivos = [os.path.join(raiz, archivo) for archivo in archivos]
+            archivos_datos.append((ruta_destino, lista_archivos))
+    return archivos_datos
+
+
 setup(
     name=package_name,
     version='0.0.0',
@@ -18,7 +30,7 @@ setup(
         (os.path.join('share', package_name, 'urdf'), glob(os.path.join('urdf', '*.xacro'))),
         # Incluir los mundos de simulación
         (os.path.join('share', package_name, 'worlds'), glob(os.path.join('worlds', '*.sdf')))
-    ],
+    ] + obtener_archivos_recursivos('models'),
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='saul_rovelo',
