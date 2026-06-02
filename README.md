@@ -19,7 +19,7 @@ Se ha separado de forma estricta el código fuente, la integración externa y la
 ├── src/                          # Código fuente ROS 2 (paquete robot_control)
 │   └── robot_control/
 │       ├── launch/               # Launch files de Gazebo
-│       ├── models/nuevo_modelo/  # Robot mecanum integrado (SDF + meshes)
+│       ├── models/               # Robot mecanum y assets de mundos
 │       ├── urdf/                 # Modelo funcional original
 │       └── worlds/               # Mundos de simulación
 ├── matlab_integration/           # Control externo con MATLAB
@@ -74,6 +74,24 @@ podman exec -it ros2_jazzy bash -lc 'export DISPLAY=:0; export XAUTHORITY=/root/
 Terminal 2:
 ```bash
 podman exec -it ros2_jazzy bash -lc 'export DISPLAY=:0; export XAUTHORITY=/root/.Xauthority; export QT_QPA_PLATFORM=xcb; export QT_X11_NO_MITSHM=1; unset WAYLAND_DISPLAY; source /opt/ros/jazzy/setup.bash; source /root/Ros/install/setup.bash; ros2 run robot_control line_follower_node'
+```
+
+### Modo D: Mundo de Obstáculos ME5413
+Este modo abre una arena compacta de obstáculos para teleoperación, SLAM, Nav2 o futuros nodos de evasión con LiDAR. El robot mecanum aparece dentro de la pista y conserva los topics `/cmd_vel`, `/scan`, `/odom`, `/tf` y `/camera/image_raw`.
+
+Terminal 1:
+```bash
+podman exec -it ros2_jazzy bash -lc 'export DISPLAY=:0; export XAUTHORITY=/root/.Xauthority; export QT_QPA_PLATFORM=xcb; export QT_X11_NO_MITSHM=1; export LIBGL_ALWAYS_SOFTWARE=1; unset WAYLAND_DISPLAY; source /opt/ros/jazzy/setup.bash; source /root/Ros/install/setup.bash; ros2 launch robot_control me5413_obstacle_world_launch.py'
+```
+
+Terminal 2:
+```bash
+podman exec -it ros2_jazzy bash -lc 'source /opt/ros/jazzy/setup.bash; source /root/Ros/install/setup.bash; ros2 topic list | sort | grep -E "^/cmd_vel$|^/scan$|^/odom$|^/tf$|^/camera/image_raw$"'
+```
+
+Prueba rapida de movimiento:
+```bash
+podman exec -it ros2_jazzy bash -lc 'source /opt/ros/jazzy/setup.bash; source /root/Ros/install/setup.bash; ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.15}, angular: {z: 0.0}}" --once'
 ```
 
 ## 6. Utilidades del Contenedor (`container/`)
