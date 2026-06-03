@@ -1,102 +1,135 @@
-# 🤖 Robot Seguidor de Línea — ROS 2 Jazzy + Gazebo Harmonic
+# Proyecto ROS 2 Jazzy + Gazebo + MATLAB/Simulink
 
-Robot autónomo seguidor de línea negra con detección de meta roja, implementado en **ROS 2 Jazzy**, **Gazebo Harmonic** y **visión por computadora (OpenCV)**.
+Base limpia para simulacion y co-simulacion de un carro mecanum en Gazebo con
+ROS 2 Jazzy.
 
-## 1. Arquitectura del Sistema
-
-El proyecto utiliza un contenedor aislado para la simulación y ROS 2, pero permite control nativo desde Fedora a través de DDS.
+## Arquitectura preparada
 
 ```text
-Host Fedora (MATLAB) <---- DDS sobre red local ----> Contenedor Ubuntu (ROS 2 + Gazebo)
+Gazebo -> ROS 2 topics -> MATLAB/Simulink -> ROS 2 /cmd_vel -> carro en Gazebo
 ```
 
-## 2. Estructura del Proyecto
-
-Se ha separado de forma estricta el código fuente, la integración externa y las herramientas del contenedor:
+Fase futura:
 
 ```text
-~/Documentos/Ros/
-├── src/                          # Código fuente ROS 2 (paquete robot_control)
+Sensores/Odometria -> estimador adaptativo -> controlador -> /cmd_vel
+```
+
+No hay implementacion completa de Simulink ni red neuronal en esta fase. Solo
+queda la base modular para integrarlas despues.
+
+## Estructura del proyecto
+
+```text
+Ros/
+├── container/
+├── docs/
+├── matlab_integration/
+│   ├── scripts/
+│   ├── simulink/
+│   └── README.md
+├── src/
 │   └── robot_control/
-│       ├── launch/               # Launch files de Gazebo
-│       ├── models/               # Robot mecanum y assets de mundos
-│       ├── urdf/                 # Modelo funcional original
-│       └── worlds/               # Mundos de simulación
-├── matlab_integration/           # Control externo con MATLAB
-│   ├── demo_line_follower.m      # MAIN DEMO: Control autónomo
-│   ├── diagnostico_conexion.m    # Herramienta de red DDS
-│   └── monitor_velocidad.m       # Gráficas en tiempo real
-├── container/                    # Configuración del contenedor Podman
-│   ├── ros2_jazzy_fedora.sh      # Instalador y creador del contenedor
-│   ├── fix_xauth.sh              # Inyector de permisos X11 para GUI de Gazebo
-│   └── rebuild.sh                # Script de compilación (wrapper de colcon)
-├── README.md                     # Esta documentación
-└── .gitignore                    # Reglas para Git
+│       ├── launch/
+│       │   ├── sim_car.launch.py
+│       │   └── sim_empty_world.launch.py
+│       ├── worlds/
+│       │   ├── nuevo_mundo.sdf
+│       │   └── mundo_vacio.sdf
+│       ├── models/
+│       │   ├── nuevo_carro/
+│       │   └── osrf/
+│       ├── config/
+│       ├── robot_control/
+│       │   ├── control/
+│       │   │   └── keyboard_teleop_node.py
+│       │   ├── sensors/
+│       │   ├── interfaces/
+│       │   └── utils/
+│       ├── package.xml
+│       └── setup.py
+├── README.md
+└── .gitignore
 ```
 
-## 3. Instalación
+- `container/`: scripts para construir y manejar el entorno del contenedor ROS 2/Gazebo.
+- `docs/`: documentacion tecnica del proyecto.
+- `matlab_integration/`: base para futura integracion con MATLAB/Simulink.
+- `src/robot_control/`: paquete principal ROS 2.
+- `launch/`: archivos para lanzar mundos, robot y nodos.
+- `worlds/`: mundos SDF de Gazebo.
+- `models/`: modelos del robot y recursos de simulacion.
+- `config/`: archivos de configuracion.
+- `robot_control/control/`: nodos o modulos de control.
+- `robot_control/sensors/`: sensores y procesamiento de datos.
+- `robot_control/interfaces/`: futura comunicacion ROS 2 con Simulink.
+- `robot_control/utils/`: funciones auxiliares.
 
-Ejecuta el script del contenedor para configurar todo automáticamente:
+## Comando principal
+
+```bash
+ros2-sim
+```
+
+Equivalente dentro del contenedor:
+
+```bash
+cd /root/Ros
+source /opt/ros/jazzy/setup.bash
+source install/setup.bash
+ros2 launch robot_control sim_car.launch.py
+```
+
+Mundo vacio de pruebas:
+
+```bash
+ros2 launch robot_control sim_empty_world.launch.py
+```
+
+Teleoperacion por teclado:
+
+```bash
+ros2 run robot_control keyboard_teleop
+```
+
+## Compilacion
+
+Desde Fedora:
+
 ```bash
 cd ~/Documentos/Ros
-bash container/ros2_jazzy_fedora.sh
-source ~/.bashrc
-```
-
-## 4. Compilación
-
-Si modificas archivos en `src/`, debes recompilar el proyecto. Hemos incluido un script en la carpeta `container/` para hacerlo desde el host sin necesidad de entrar al contenedor:
-
-```bash
 bash container/rebuild.sh
 ```
 
-## 5. Ejecución del Proyecto
+Dentro del contenedor:
 
-### Modo A: Seguidor Nativo en ROS 2 (Python)
-1. Terminal 1: Abre la simulación con `ros2-sim`
-2. Terminal 2: Inicia el controlador interno con `ros2-follower`
-
-### Modo B: Control Externo desde MATLAB
-1. Terminal 1: Abre la simulación con `ros2-sim`
-2. Host: Abre MATLAB y ejecuta `matlab_integration/demo_line_follower.m`
-
-> **ADVERTENCIA:** ¡No ejecutes el Modo A y el Modo B simultáneamente! Ambos compiten por publicar en `/cmd_vel` y el robot oscilará violentamente.
-
-### Modo C: Nuevo Modelo Mecanum en Gazebo
-El nuevo robot está integrado dentro de `src/robot_control/models/nuevo_modelo/`.
-
-Terminal 1:
 ```bash
-podman exec -it ros2_jazzy bash -lc 'export DISPLAY=:0; export XAUTHORITY=/root/.Xauthority; export QT_QPA_PLATFORM=xcb; export QT_X11_NO_MITSHM=1; unset WAYLAND_DISPLAY; source /opt/ros/jazzy/setup.bash; source /root/Ros/install/setup.bash; ros2 launch robot_control sim_mecanum_launch.py'
+cd /root/Ros
+source /opt/ros/jazzy/setup.bash
+colcon build --symlink-install
+source install/setup.bash
 ```
 
-Terminal 2:
-```bash
-podman exec -it ros2_jazzy bash -lc 'export DISPLAY=:0; export XAUTHORITY=/root/.Xauthority; export QT_QPA_PLATFORM=xcb; export QT_X11_NO_MITSHM=1; unset WAYLAND_DISPLAY; source /opt/ros/jazzy/setup.bash; source /root/Ros/install/setup.bash; ros2 run robot_control line_follower_node'
-```
+## Topics principales
 
-### Modo D: Mundo de Obstáculos ME5413
-Este modo abre una arena compacta de obstáculos para teleoperación, SLAM, Nav2 o futuros nodos de evasión con LiDAR. El robot mecanum aparece dentro de la pista y conserva los topics `/cmd_vel`, `/scan`, `/odom`, `/tf` y `/camera/image_raw`.
+Entradas hacia MATLAB/Simulink:
 
-Terminal 1:
-```bash
-podman exec -it ros2_jazzy bash -lc 'export DISPLAY=:0; export XAUTHORITY=/root/.Xauthority; export QT_QPA_PLATFORM=xcb; export QT_X11_NO_MITSHM=1; export LIBGL_ALWAYS_SOFTWARE=1; unset WAYLAND_DISPLAY; source /opt/ros/jazzy/setup.bash; source /root/Ros/install/setup.bash; ros2 launch robot_control me5413_obstacle_world_launch.py'
-```
+- `/odom`
+- `/scan`
+- `/imu`
+- `/joint_states`
+- `/ground_truth_pose` opcional
 
-Terminal 2:
-```bash
-podman exec -it ros2_jazzy bash -lc 'source /opt/ros/jazzy/setup.bash; source /root/Ros/install/setup.bash; ros2 topic list | sort | grep -E "^/cmd_vel$|^/scan$|^/odom$|^/tf$|^/camera/image_raw$"'
-```
+Salida de MATLAB/Simulink:
 
-Prueba rapida de movimiento:
-```bash
-podman exec -it ros2_jazzy bash -lc 'source /opt/ros/jazzy/setup.bash; source /root/Ros/install/setup.bash; ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.15}, angular: {z: 0.0}}" --once'
-```
+- `/cmd_vel`
 
-## 6. Utilidades del Contenedor (`container/`)
+## Modulos base
 
-Esta carpeta aísla los scripts operativos del host:
-- **`fix_xauth.sh`**: Transfiere de forma segura las credenciales de Wayland/X11 (`.Xauthority`) hacia el contenedor. Es invocado automáticamente por el alias `ros2-sim`.
-- **`rebuild.sh`**: Lanza de forma transparente `colcon build` dentro de Podman.
-- **`ros2_jazzy_fedora.sh`**: Orquesta todo el despliegue del proyecto.
+- `robot_control/interfaces/ros_to_simulink_bridge.py`
+- `robot_control/interfaces/simulink_to_ros_bridge.py`
+- `robot_control/interfaces/topic_config.py`
+
+Estos modulos son esqueletos para organizar la comunicacion futura. El puente
+de comandos esta desactivado por defecto para evitar publicar en `/cmd_vel` sin
+intencion explicita.

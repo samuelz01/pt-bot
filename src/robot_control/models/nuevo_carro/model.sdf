@@ -1,11 +1,10 @@
 <?xml version="1.0" ?>
 <!-- ============================================================
-     models/nuevo_modelo/model.sdf
+     models/nuevo_carro/model.sdf
      Modelo SDF del robot mecanum con 4 ruedas omnidireccionales,
      sensor LIDAR (ydlidar_x2l) y camara RGBD (OAK-D).
      
-     Adaptado para el proyecto terminal de seguidor de linea.
-     Las rutas de los meshes apuntan a model://nuevo_modelo/...
+     Las rutas de los meshes apuntan a model://nuevo_carro/...
      ============================================================ -->
 
 <sdf version="1.7" xmlns:ignition="https://ignitionrobotics.org">
@@ -48,11 +47,20 @@
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
-            <uri>model://nuevo_modelo/meshes/mecanum_bot_chassis.obj</uri>
+            <uri>model://nuevo_carro/meshes/mecanum_bot_chassis.obj</uri>
             <scale>1 1 1</scale>
           </mesh>
         </geometry>
       </visual>
+      <!-- IMU base para futura co-simulacion con Simulink/control adaptativo -->
+      <sensor name="base_imu" type="imu">
+        <pose>0 0 0 0 0 0</pose>
+        <always_on>true</always_on>
+        <update_rate>100</update_rate>
+        <visualize>false</visualize>
+        <topic>imu</topic>
+        <gz_frame_id>base_link</gz_frame_id>
+      </sensor>
     </link>
 
     <!-- ============================================ -->
@@ -76,7 +84,7 @@
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
-            <uri>model://nuevo_modelo/meshes/mecanum_bot_wheel.obj</uri>
+            <uri>model://nuevo_carro/meshes/mecanum_bot_wheel.obj</uri>
             <scale>1 1 1</scale>
           </mesh>
         </geometry>
@@ -139,7 +147,7 @@
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
-            <uri>model://nuevo_modelo/meshes/mecanum_bot_wheel.obj</uri>
+            <uri>model://nuevo_carro/meshes/mecanum_bot_wheel.obj</uri>
             <scale>1 1 1</scale>
           </mesh>
         </geometry>
@@ -198,7 +206,7 @@
         <pose>0 0 0 0 0 -3.14</pose>
         <geometry>
           <mesh>
-            <uri>model://nuevo_modelo/meshes/mecanum_bot_wheel.obj</uri>
+            <uri>model://nuevo_carro/meshes/mecanum_bot_wheel.obj</uri>
             <scale>1 1 1</scale>
           </mesh>
         </geometry>
@@ -254,7 +262,7 @@
         <pose>0 0 0 0 0 -3.14</pose>
         <geometry>
           <mesh>
-            <uri>model://nuevo_modelo/meshes/mecanum_bot_wheel.obj</uri>
+            <uri>model://nuevo_carro/meshes/mecanum_bot_wheel.obj</uri>
             <scale>1 1 1</scale>
           </mesh>
         </geometry>
@@ -318,7 +326,7 @@
       <visual name="lidar_sensor_visual">
         <geometry>
           <mesh>
-            <uri>model://nuevo_modelo/meshes/ydlidar_x2l.obj</uri>
+            <uri>model://nuevo_carro/meshes/ydlidar_x2l.obj</uri>
             <scale>1.0 1.0 1.0</scale>
           </mesh>
         </geometry>
@@ -359,7 +367,7 @@
     <!-- Montada al frente del chasis. Publica        -->
     <!-- imagen RGB y profundidad.                    -->
     <!-- Resolucion reducida a 320x240 para           -->
-    <!-- compatibilidad con el nodo seguidor de linea -->
+    <!-- procesamiento en tiempo real                 -->
     <!-- ============================================ -->
     <link name="oak-d_frame">
       <pose>0.143 0.0 0.136 0 1.2 0</pose>
@@ -392,7 +400,7 @@
         <camera>
           <horizontal_fov>1.204</horizontal_fov>
           <image>
-            <!-- Resolucion reducida para procesamiento rapido del seguidor de linea -->
+            <!-- Resolucion reducida para procesamiento rapido -->
             <width>320</width>
             <height>240</height>
             <format>B8G8R8</format>

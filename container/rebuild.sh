@@ -13,6 +13,7 @@ podman exec "$CONTAINER_NAME" bash -c '
   set -eo pipefail
   source /opt/ros/jazzy/setup.bash
   cd /root/Ros
+  rm -rf build install log
   colcon build --packages-select robot_control --symlink-install
   echo ""
   echo "✅ Recompilación completa."

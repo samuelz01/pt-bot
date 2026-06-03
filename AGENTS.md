@@ -1,61 +1,77 @@
 # AGENTS.md
 
 ## Idioma
-Responde siempre en español claro y paso a paso.
+
+Responde siempre en espanol claro y paso a paso.
 
 ## Proyecto
+
 Proyecto de robot con:
-- Host Fedora
-- MATLAB en el host
-- ROS 2 Jazzy + Gazebo dentro de contenedor Podman
-- Contenedor con --network host
-- ROS_DOMAIN_ID=0
-- Ruta host: ~/Documentos/Ros
-- Ruta contenedor: /root/Ros
 
-## Estado funcional que NO debe romperse
-Actualmente funcionan:
-- ros2-sim
-- ros2-follower
-- MATLAB se conecta a ROS 2
-- matlab_integration/demo_line_follower.m controla el robot
+- Host Fedora.
+- MATLAB/Simulink previsto en el host.
+- ROS 2 Jazzy + Gazebo dentro de contenedor Podman.
+- Contenedor con `--network host`.
+- `ROS_DOMAIN_ID=0`.
+- Ruta host: `~/Documentos/Ros`.
+- Ruta contenedor: `/root/Ros`.
 
-No romper esas funciones.
+## Arquitectura actual
 
-## Reglas estrictas
-- No cambiar la arquitectura principal.
-- No editar, mover, borrar o renombrar archivos críticos sin revisar referencias antes.
-- No romper demo_line_follower.m.
-- No romper ros2-sim.
-- No romper ros2-follower.
-- No cambiar topics ROS como /cmd_vel sin aprobación.
-- No ejecutar comandos destructivos como rm, git reset --hard, git clean o git checkout -- sin aprobación.
-- Hacer cambios pequeños, seguros y verificables.
-- Antes de editar, explicar qué archivos se van a tocar.
-- Después de editar, mostrar git status --short y git diff.
+El repositorio conserva solo la nueva base:
 
+- Mundo principal: `src/robot_control/worlds/nuevo_mundo.sdf`.
+- Carro principal: `src/robot_control/models/nuevo_carro/model.sdf`.
+- Launch principal: `src/robot_control/launch/sim_car.launch.py`.
+- Interfaces base para MATLAB/Simulink en `robot_control/interfaces/`.
 
-## Verificación
-Usar estos comandos cuando aplique:
+Flujo preparado:
 
+```text
+Gazebo -> ROS 2 topics -> MATLAB/Simulink -> ROS 2 /cmd_vel -> carro en Gazebo
+```
+
+Flujo adaptativo futuro:
+
+```text
+Sensores/Odometria -> estimador adaptativo -> controlador -> /cmd_vel
+```
+
+## Reglas
+
+- No cambiar `/cmd_vel` sin aprobacion.
+- Mantener `ros2-sim` como comando principal de simulacion.
+- No implementar Simulink completo ni red neuronal hasta pedirlo explicitamente.
+- Hacer cambios pequenos, verificables y acordes con la arquitectura modular.
+- Antes de editar, explicar que archivos se van a tocar.
+- Despues de editar, mostrar `git status --short` y `git diff`.
+
+## Verificacion
+
+Usar cuando aplique:
+
+```bash
 git status --short
 git diff
-rg "demo_line_follower|ros2-sim|ros2-follower|cmd_vel|ROS_DOMAIN_ID|podman|gazebo|matlab"
+rg "sim_car|nuevo_mundo|nuevo_carro|cmd_vel|ROS_DOMAIN_ID|podman|gazebo|matlab|simulink"
+```
 
-## Comandos funcionales conocidos
+## Comandos funcionales
+
 Host:
+
+```bash
 cd ~/Documentos/Ros
+bash container/rebuild.sh
+ros2-sim
+```
 
 Contenedor:
+
+```bash
 cd /root/Ros
 source /opt/ros/jazzy/setup.bash
-colcon build
+colcon build --symlink-install
 source install/setup.bash
-
-Ejecución:
-ros2-sim
-ros2-follower
-
-MATLAB:
-cd('~/Documentos/Ros/matlab_integration')
-run('demo_line_follower.m')
+ros2 launch robot_control sim_car.launch.py
+```

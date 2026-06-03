@@ -1,0 +1,32 @@
+simulink_inputs:
+  odom:
+    topic: /odom
+    type: nav_msgs/msg/Odometry
+    required: true
+  scan:
+    topic: /scan
+    type: sensor_msgs/msg/LaserScan
+    required: true
+  imu:
+    topic: /imu
+    type: sensor_msgs/msg/Imu
+    required: true
+  joint_states:
+    topic: /joint_states
+    type: sensor_msgs/msg/JointState
+    required: true
+  ground_truth_pose:
+    topic: /ground_truth_pose
+    type: geometry_msgs/msg/PoseStamped
+    required: false
+
+simulink_outputs:
+  cmd_vel:
+    topic: /cmd_vel
+    type: geometry_msgs/msg/Twist
+    required: true
+
+gazebo_internal_topics:
+  mecanum_cmd_vel: /model/mecanum_bot/cmd_vel
+  mecanum_odom: /model/mecanum_bot/odometry
+  mecanum_joint_state: /world/nuevo_mundo/model/mecanum_bot/joint_state

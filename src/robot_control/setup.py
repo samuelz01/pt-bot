@@ -11,9 +11,18 @@ def obtener_archivos_recursivos(directorio_base):
         if archivos:
             ruta_relativa = os.path.relpath(raiz, '.')
             ruta_destino = os.path.join('share', package_name, ruta_relativa)
-            lista_archivos = [os.path.join(raiz, archivo) for archivo in archivos]
-            archivos_datos.append((ruta_destino, lista_archivos))
+            lista_archivos = [
+                os.path.join(raiz, archivo)
+                for archivo in archivos
+                if os.path.isfile(os.path.join(raiz, archivo))
+            ]
+            if lista_archivos:
+                archivos_datos.append((ruta_destino, lista_archivos))
     return archivos_datos
+
+
+def glob_archivos_existentes(patron):
+    return [ruta for ruta in glob(patron) if os.path.isfile(ruta)]
 
 
 setup(
@@ -24,26 +33,23 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        # Aquí le indicamos a ROS que copie la carpeta launch durante la compilación
-        (os.path.join('share', package_name, 'launch'), glob(os.path.join('launch', '*launch.[pxy][yma]*'))),
-        # Incluir la carpeta urdf
-        (os.path.join('share', package_name, 'urdf'), glob(os.path.join('urdf', '*.xacro'))),
-        # Incluir los mundos de simulación
-        (os.path.join('share', package_name, 'worlds'), glob(os.path.join('worlds', '*.sdf')))
+        # Instalar launch files, mundos, configuracion y modelos de Gazebo.
+        (os.path.join('share', package_name, 'launch'), glob_archivos_existentes(os.path.join('launch', '*launch.[pxy][yma]*'))),
+        (os.path.join('share', package_name, 'worlds'), glob_archivos_existentes(os.path.join('worlds', '*.sdf'))),
+        (os.path.join('share', package_name, 'config'), glob_archivos_existentes(os.path.join('config', '*.yaml'))),
     ] + obtener_archivos_recursivos('models'),
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='saul_rovelo',
     maintainer_email='saul_rovelo@todo.todo',
-    description='Practica de comunicacion entre nodos ROS 2 con secuencia fija',
+    description='Base ROS 2/Gazebo para co-simulacion con MATLAB y Simulink',
     license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'commander_node = robot_control.commander_node:main',
-            'controller_node = robot_control.controller_node:main',
-            'monitor_node = robot_control.monitor_node:main',
-            'line_follower_node = robot_control.line_follower_node:main',
+            'ros_to_simulink_bridge = robot_control.interfaces.ros_to_simulink_bridge:main',
+            'simulink_to_ros_bridge = robot_control.interfaces.simulink_to_ros_bridge:main',
+            'keyboard_teleop = robot_control.control.keyboard_teleop_node:main',
         ],
     },
 )

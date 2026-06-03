@@ -66,7 +66,7 @@ podman run -d \
   --env GZ_IP=127.0.0.1 \
   --env IGN_IP=127.0.0.1 \
   --volume /tmp/.X11-unix:/tmp/.X11-unix:rw \
-  --volume "$WORKSPACE:/root/ros2_ws:rw" \
+  --volume "$WORKSPACE:/root/Ros:rw" \
   --device /dev/dri \
   --security-opt label=disable \
   docker.io/library/ubuntu:24.04 \
@@ -117,15 +117,11 @@ apt-get install -y \
   ros-jazzy-ros-gz-sim \
   ros-jazzy-ros-gz-bridge \
   ros-jazzy-ros-gz-interfaces \
-  ros-jazzy-robot-state-publisher \
-  ros-jazzy-cv-bridge \
   ros-jazzy-sensor-msgs \
   ros-jazzy-geometry-msgs \
   ros-jazzy-teleop-twist-keyboard \
-  ros-jazzy-xacro \
   python3-colcon-common-extensions \
   python3-rosdep \
-  python3-opencv \
   python3-pip \
   git vim wget \
   libgl1 libgl1-mesa-dri libglx-mesa0 \
@@ -133,7 +129,7 @@ apt-get install -y \
 
 cat >> /root/.bashrc << 'CONTAINER_ENV'
 source /opt/ros/jazzy/setup.bash
-source /root/ros2_ws/install/setup.bash 2>/dev/null || true
+source /root/Ros/install/setup.bash 2>/dev/null || true
 # ── Display: XWayland via xcb (Gazebo GUI fix) ────────────────────────────
 export DISPLAY=:0
 export XAUTHORITY=/root/.Xauthority
@@ -162,7 +158,7 @@ info "Compilando workspace robot_control..."
 podman exec "$CONTAINER_NAME" bash -c '
   set -eo pipefail
   source /opt/ros/jazzy/setup.bash
-  cd /root/ros2_ws
+  cd /root/Ros
   rm -rf build install log
   colcon build --packages-select robot_control --symlink-install
   echo "✅ Compilación exitosa."
@@ -174,11 +170,9 @@ info "Validando instalación..."
 podman exec "$CONTAINER_NAME" bash -c '
   set -eo pipefail
   source /opt/ros/jazzy/setup.bash
-  source /root/ros2_ws/install/setup.bash
+  source /root/Ros/install/setup.bash
   echo "ROS_DISTRO: $ROS_DISTRO"
   ros2 pkg list | grep robot_control && echo "✅ paquete robot_control visible"
-  python3 -c "import cv2; print(\"OpenCV:\", cv2.__version__)"
-  python3 -c "from cv_bridge import CvBridge; print(\"cv_bridge: OK\")"
 '
 ok "Validación completa."
 
@@ -187,17 +181,16 @@ ALIAS_FILE="$HOME/.bashrc"
 
 # Limpiar alias anteriores para actualizarlos
 sed -i '/# ros2_jazzy_fedora aliases/,/^ALIASES$/d' "$ALIAS_FILE" 2>/dev/null || true
-sed -i '/alias ros2-sim=/d; /alias ros2-follower=/d; /alias ros2-shell=/d; /alias ros2-topics=/d; /alias ros2-start=/d; /alias ros2-xauth=/d' "$ALIAS_FILE" 2>/dev/null || true
+sed -i '/alias ros2-[[:alnum:]_-]*=/d' "$ALIAS_FILE" 2>/dev/null || true
 
 cat >> "$ALIAS_FILE" << 'ALIASES'
 
 # ros2_jazzy_fedora aliases
-alias ros2-xauth='bash ~/Documentos/Ros/fix_xauth.sh'
-alias ros2-start='podman start ros2_jazzy 2>/dev/null || true && bash ~/Documentos/Ros/fix_xauth.sh'
-alias ros2-sim='bash ~/Documentos/Ros/fix_xauth.sh && podman exec -it ros2_jazzy bash -c "export DISPLAY=:0; export XAUTHORITY=/root/.Xauthority; export QT_QPA_PLATFORM=xcb; export QT_X11_NO_MITSHM=1; unset WAYLAND_DISPLAY; export GZ_IP=127.0.0.1; export IGN_IP=127.0.0.1; source /opt/ros/jazzy/setup.bash && source /root/ros2_ws/install/setup.bash && ros2 launch robot_control sim_tricycle_launch.py"'
-alias ros2-follower='podman exec -it ros2_jazzy bash -c "export DISPLAY=:0; export XAUTHORITY=/root/.Xauthority; export QT_QPA_PLATFORM=xcb; export QT_X11_NO_MITSHM=1; unset WAYLAND_DISPLAY; source /opt/ros/jazzy/setup.bash && source /root/ros2_ws/install/setup.bash && ros2 run robot_control line_follower_node"'
+alias ros2-xauth='bash ~/Documentos/Ros/container/fix_xauth.sh'
+alias ros2-start='podman start ros2_jazzy 2>/dev/null || true && bash ~/Documentos/Ros/container/fix_xauth.sh'
+alias ros2-sim='bash ~/Documentos/Ros/container/fix_xauth.sh && podman exec -it ros2_jazzy bash -c "export DISPLAY=:0; export XAUTHORITY=/root/.Xauthority; export QT_QPA_PLATFORM=xcb; export QT_X11_NO_MITSHM=1; unset WAYLAND_DISPLAY; export GZ_IP=127.0.0.1; export IGN_IP=127.0.0.1; source /opt/ros/jazzy/setup.bash && source /root/Ros/install/setup.bash && ros2 launch robot_control sim_car.launch.py"'
 alias ros2-shell='podman exec -it ros2_jazzy bash'
-alias ros2-topics='podman exec ros2_jazzy bash -c "source /opt/ros/jazzy/setup.bash && source /root/ros2_ws/install/setup.bash && ros2 topic list"'
+alias ros2-topics='podman exec ros2_jazzy bash -c "source /opt/ros/jazzy/setup.bash && source /root/Ros/install/setup.bash && ros2 topic list"'
 ALIASES
 ok "Alias actualizados en ~/.bashrc"
 
@@ -210,9 +203,6 @@ echo -e "  ${CYAN}Para ejecutar el proyecto:${NC}"
 echo ""
 echo -e "  ${YELLOW}# Terminal 1 – Simulación${NC}"
 echo -e "  ros2-sim"
-echo ""
-echo -e "  ${YELLOW}# Terminal 2 – Seguidor de línea${NC}"
-echo -e "  ros2-follower"
 echo ""
 echo -e "  ${YELLOW}# Shell dentro del contenedor${NC}"
 echo -e "  ros2-shell"
