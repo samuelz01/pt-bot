@@ -102,33 +102,15 @@ def generate_launch_description():
         output='screen',
     )
 
-    ros_to_simulink = Node(
-        package='robot_control',
-        executable='ros_to_simulink_bridge',
-        name='ros_to_simulink_bridge',
-        output='screen',
-    )
-
-    simulink_to_ros = Node(
-        package='robot_control',
-        executable='simulink_to_ros_bridge',
-        name='simulink_to_ros_bridge',
-        parameters=[{'enable_forwarding': False}],
-        output='screen',
-    )
-
     return LaunchDescription([
         SetEnvironmentVariable('GZ_SIM_RESOURCE_PATH', rutas_gz),
         SetEnvironmentVariable('IGN_GAZEBO_RESOURCE_PATH', rutas_gz),
         SetEnvironmentVariable('GZ_IP', '127.0.0.1'),
         SetEnvironmentVariable('IGN_IP', '127.0.0.1'),
-        SetEnvironmentVariable('LIBGL_ALWAYS_SOFTWARE', '1'),
         argumento_mundo,
         argumento_gz,
         argumento_topicos,
         simulador,
         crear_robot,
         puente,
-        ros_to_simulink,
-        simulink_to_ros,
     ])

@@ -122,7 +122,6 @@ def generate_launch_description():
         SetEnvironmentVariable('IGN_GAZEBO_RESOURCE_PATH', rutas_gz),
         SetEnvironmentVariable('GZ_IP', '127.0.0.1'),
         SetEnvironmentVariable('IGN_IP', '127.0.0.1'),
-        SetEnvironmentVariable('LIBGL_ALWAYS_SOFTWARE', '1'),
         argumento_mundo,
         argumento_gz,
         argumento_topicos,

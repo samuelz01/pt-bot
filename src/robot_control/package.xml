@@ -4,7 +4,7 @@
   <name>robot_control</name>
   <version>0.0.0</version>
   <description>Base ROS 2/Gazebo para co-simulacion con MATLAB y Simulink</description>
-  <maintainer email="saul_rovelo@todo.todo">saul_rovelo</maintainer>
+  <maintainer email="samuel_perez@todo.todo">Samuel Perez</maintainer>
   <license>TODO: License declaration</license>
 
   <depend>rclpy</depend>

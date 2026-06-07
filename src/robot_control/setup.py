@@ -40,8 +40,8 @@ setup(
     ] + obtener_archivos_recursivos('models'),
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='saul_rovelo',
-    maintainer_email='saul_rovelo@todo.todo',
+    maintainer='Samuel Perez',
+    maintainer_email='samuel_perez@todo.todo',
     description='Base ROS 2/Gazebo para co-simulacion con MATLAB y Simulink',
     license='TODO: License declaration',
     tests_require=['pytest'],
@@ -50,6 +50,7 @@ setup(
             'ros_to_simulink_bridge = robot_control.interfaces.ros_to_simulink_bridge:main',
             'simulink_to_ros_bridge = robot_control.interfaces.simulink_to_ros_bridge:main',
             'keyboard_teleop = robot_control.control.keyboard_teleop_node:main',
+            'simulink_router = robot_control.control.simulink_router_node:main',
         ],
     },
 )

@@ -34,4 +34,4 @@ dist/
 
 # ── Gazebo / simulación ───────────────────────────────────────────────────────
 *.world.generated
-gz_*.log
+gz_*.logREADME_UBUNTU.md

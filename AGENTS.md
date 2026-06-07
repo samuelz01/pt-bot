@@ -2,74 +2,77 @@
 
 ## Idioma
 
-Responde siempre en espanol claro y paso a paso.
+Responde siempre en español claro y paso a paso.
 
-## Proyecto
+## Proyecto y Contexto Colaborativo
 
-Proyecto de robot con:
+Este es un proyecto de robótica híbrido y **colaborativo desarrollado por dos personas**:
+1. **Desarrollador 1 (Ubuntu Nativo):** Trabaja directamente en su host usando ROS 2 Jazzy. Todo lo relacionado a contenedores debe ser ignorado por él.
+2. **Desarrollador 2 (Fedora Contenedor):** Depende de la carpeta `container/` usando Podman con `--network host` y `ROS_DOMAIN_ID=0` para aislar el entorno.
 
-- Host Fedora.
-- MATLAB/Simulink previsto en el host.
-- ROS 2 Jazzy + Gazebo dentro de contenedor Podman.
-- Contenedor con `--network host`.
-- `ROS_DOMAIN_ID=0`.
-- Ruta host: `~/Documentos/Ros`.
-- Ruta contenedor: `/root/Ros`.
+Ambos comparten este repositorio. Las respuestas y acciones de la IA deben respetar siempre a ambos desarrolladores y no romper el flujo de trabajo de ninguno de los dos.
 
 ## Arquitectura actual
 
-El repositorio conserva solo la nueva base:
+El proyecto incluye co-simulación de un robot mecanum con MATLAB/Simulink.
 
 - Mundo principal: `src/robot_control/worlds/nuevo_mundo.sdf`.
+- Mundo vacío: `src/robot_control/launch/sim_empty_world.launch.py`.
 - Carro principal: `src/robot_control/models/nuevo_carro/model.sdf`.
 - Launch principal: `src/robot_control/launch/sim_car.launch.py`.
 - Interfaces base para MATLAB/Simulink en `robot_control/interfaces/`.
 
-Flujo preparado:
-
+Flujo de lazo cerrado preparado:
 ```text
 Gazebo -> ROS 2 topics -> MATLAB/Simulink -> ROS 2 /cmd_vel -> carro en Gazebo
 ```
 
 Flujo adaptativo futuro:
-
 ```text
 Sensores/Odometria -> estimador adaptativo -> controlador -> /cmd_vel
 ```
 
 ## Reglas
 
-- No cambiar `/cmd_vel` sin aprobacion.
-- Mantener `ros2-sim` como comando principal de simulacion.
-- No implementar Simulink completo ni red neuronal hasta pedirlo explicitamente.
-- Hacer cambios pequenos, verificables y acordes con la arquitectura modular.
-- Antes de editar, explicar que archivos se van a tocar.
-- Despues de editar, mostrar `git status --short` y `git diff`.
+- Al sugerir comandos de terminal, **diferencia claramente** entre el entorno nativo en Ubuntu y el entorno en contenedor para Fedora.
+- Nunca recomiendes eliminar la carpeta `container/` ni sus scripts.
+- No cambiar el topic base `/cmd_vel` sin aprobación expresa.
+- Mantener `ros2-sim` como comando principal de simulación para el usuario de Fedora.
+- Hacer cambios pequeños, verificables y acordes con la arquitectura modular.
+- Antes de editar, explicar qué archivos se van a tocar.
 
-## Verificacion
+## Comandos Funcionales (Nativo - Ubuntu)
 
-Usar cuando aplique:
-
+Compilación:
 ```bash
-git status --short
-git diff
-rg "sim_car|nuevo_mundo|nuevo_carro|cmd_vel|ROS_DOMAIN_ID|podman|gazebo|matlab|simulink"
+source /opt/ros/jazzy/setup.bash
+colcon build --symlink-install
 ```
 
-## Comandos funcionales
+Ejecución principal:
+```bash
+source install/setup.bash
+export QT_QPA_PLATFORM=xcb
+ros2 launch robot_control sim_car.launch.py
+ros2 run robot_control simulink_router
+```
+
+Opciones extra:
+```bash
+ros2 launch robot_control sim_empty_world.launch.py
+ros2 run robot_control keyboard_teleop
+```
+
+## Comandos Funcionales (Contenedor - Fedora)
 
 Host:
-
 ```bash
-cd ~/Documentos/Ros
 bash container/rebuild.sh
 ros2-sim
 ```
 
 Contenedor:
-
 ```bash
-cd /root/Ros
 source /opt/ros/jazzy/setup.bash
 colcon build --symlink-install
 source install/setup.bash

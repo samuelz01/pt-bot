@@ -10,7 +10,7 @@ from geometry_msgs.msg import PoseStamped
 from nav_msgs.msg import Odometry
 import rclpy
 from rclpy.node import Node
-from sensor_msgs.msg import Imu, JointState, LaserScan
+from sensor_msgs.msg import Imu, JointState, LaserScan, Image
 
 from robot_control.interfaces.topic_config import SIMULINK_INPUT_TOPICS
 
@@ -30,11 +30,18 @@ class RosToSimulinkBridge(Node):
 
         self.latest_messages = {}
         self.message_counts = {key: 0 for key in SIMULINK_INPUT_TOPICS}
+        # Add camera manually since it wasn't in the config dictionary
+        self.message_counts['camera'] = 0
+
+        # Publicador para Simulink (El filtro)
+        self.simulink_odom_pub = self.create_publisher(
+            Odometry, '/simulink/odom_filtered', 10
+        )
 
         self.create_subscription(
             Odometry,
             SIMULINK_INPUT_TOPICS['odom'].name,
-            self._store_message('odom'),
+            self._odom_callback,
             10,
         )
         self.create_subscription(
@@ -55,6 +62,12 @@ class RosToSimulinkBridge(Node):
             self._store_message('joint_states'),
             10,
         )
+        self.create_subscription(
+            Image,
+            '/camera/image_raw',
+            self._store_message('camera'),
+            10,
+        )
 
         if enable_ground_truth:
             self.create_subscription(
@@ -64,8 +77,8 @@ class RosToSimulinkBridge(Node):
                 10,
             )
 
-        self.create_timer(5.0, self._log_status)
-        self.get_logger().info('ROS to Simulink bridge ready in passive mode.')
+        self.create_timer(1.0, self._log_status)  # Imprimir cada segundo
+        self.get_logger().info('ROS to Simulink bridge ready. Processing sensors...')
 
     def _store_message(self, key):
         def callback(message):
@@ -74,11 +87,31 @@ class RosToSimulinkBridge(Node):
 
         return callback
 
+    def _odom_callback(self, message):
+        # Guardar para el logger
+        self.latest_messages['odom'] = message
+        self.message_counts['odom'] += 1
+        
+        # Opcionalmente procesar aquí. Por ahora, reenviamos tal cual a Simulink
+        self.simulink_odom_pub.publish(message)
+
     def _log_status(self):
-        counts = ', '.join(
-            f'{key}={count}' for key, count in sorted(self.message_counts.items())
-        )
-        self.get_logger().info(f'Passive topic counters: {counts}')
+        # Imprimir datos de los sensores de forma tangible
+        odom_msg = self.latest_messages.get('odom')
+        scan_msg = self.latest_messages.get('scan')
+        cam_msg = self.latest_messages.get('camera')
+
+        if odom_msg and scan_msg:
+            x_pos = odom_msg.pose.pose.position.x
+            # Buscar el obstáculo más cercano
+            min_dist = min([d for d in scan_msg.ranges if d > 0.0], default=float('inf'))
+            cam_status = "OK" if cam_msg else "No Data"
+            
+            self.get_logger().info(
+                f'Sensor Data -> Odom X: {x_pos:.2f} m | Lidar Min Dist: {min_dist:.2f} m | Cam: {cam_status}'
+            )
+        else:
+            self.get_logger().info('Waiting for sensor data from Gazebo...')
 
 
 def main(args=None):
