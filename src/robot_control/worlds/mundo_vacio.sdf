@@ -47,28 +47,74 @@
       <direction>-0.45 0.25 -0.86</direction>
     </light>
 
-    <model name="arena_floor">
+    <!-- Tira 1: Alto agarre (Rojo) - X: -7 a -3.5 -->
+    <model name="floor_s1_red_high_friction">
       <static>true</static>
-      <pose>0 0 -0.03 0 0 0</pose>
+      <pose>-5.25 0 -0.03 0 0 0</pose>
       <link name="link">
         <collision name="collision">
-          <geometry>
-            <box>
-              <size>14 10 0.06</size>
-            </box>
-          </geometry>
+          <geometry><box><size>3.5 10 0.06</size></box></geometry>
+          <surface>
+            <friction><ode><mu>1.0</mu><mu2>1.0</mu2></ode></friction>
+          </surface>
         </collision>
         <visual name="visual">
-          <geometry>
-            <box>
-              <size>14 10 0.06</size>
-            </box>
-          </geometry>
-          <material>
-            <ambient>0.34 0.36 0.35 1</ambient>
-            <diffuse>0.42 0.44 0.43 1</diffuse>
-            <specular>0.05 0.05 0.05 1</specular>
-          </material>
+          <geometry><box><size>3.5 10 0.06</size></box></geometry>
+          <material><ambient>0.8 0.1 0.1 1</ambient><diffuse>0.9 0.2 0.2 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Tira 2: Friccion Media (Amarillo) - X: -3.5 a 0 -->
+    <model name="floor_s2_yellow_mid_friction">
+      <static>true</static>
+      <pose>-1.75 0 -0.03 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>3.5 10 0.06</size></box></geometry>
+          <surface>
+            <friction><ode><mu>0.1</mu><mu2>0.1</mu2></ode></friction>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>3.5 10 0.06</size></box></geometry>
+          <material><ambient>0.8 0.8 0.1 1</ambient><diffuse>0.9 0.9 0.2 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Tira 3: Friccion Baja (Verde) - X: 0 a 3.5 -->
+    <model name="floor_s3_green_low_friction">
+      <static>true</static>
+      <pose>1.75 0 -0.03 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>3.5 10 0.06</size></box></geometry>
+          <surface>
+            <friction><ode><mu>0.01</mu><mu2>0.01</mu2></ode></friction>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>3.5 10 0.06</size></box></geometry>
+          <material><ambient>0.1 0.8 0.1 1</ambient><diffuse>0.2 0.9 0.2 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Tira 4: Hielo / Sin agarre (Azul) - X: 3.5 a 7 -->
+    <model name="floor_s4_blue_ice">
+      <static>true</static>
+      <pose>5.25 0 -0.03 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>3.5 10 0.06</size></box></geometry>
+          <surface>
+            <friction><ode><mu>0.001</mu><mu2>0.001</mu2></ode></friction>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>3.5 10 0.06</size></box></geometry>
+          <material><ambient>0.1 0.1 0.8 1</ambient><diffuse>0.2 0.2 0.9 1</diffuse></material>
         </visual>
       </link>
     </model>
