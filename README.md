@@ -40,8 +40,8 @@ Dependiendo de tu sistema operativo, elige la opción correspondiente:
 ### Opción A: Instalación Nativa (Ubuntu)
 
 **1. Compilación:**
-```bash
-source /opt/ros/jazzy/setup.bash
+```zsh
+source /opt/ros/jazzy/setup.zsh
 colcon build --symlink-install
 ```
 
@@ -49,17 +49,17 @@ colcon build --symlink-install
 Abre dos terminales para correr la simulación y el enrutador:
 
 *Terminal 1 (Gazebo con el mundo principal):*
-```bash
-source /opt/ros/jazzy/setup.bash
-source install/setup.bash
+```zsh
+source /opt/ros/jazzy/setup.zsh
+source install/setup.zsh
 export QT_QPA_PLATFORM=xcb
 ros2 launch robot_control sim_car.launch.py
 ```
 
 *Terminal 2 (Router para Simulink):*
-```bash
-source /opt/ros/jazzy/setup.bash
-source install/setup.bash
+```zsh
+source /opt/ros/jazzy/setup.zsh
+source install/setup.zsh
 ros2 run robot_control simulink_router
 ```
 
@@ -93,18 +93,38 @@ ros2 launch robot_control sim_car.launch.py
 Además de la ejecución base, el paquete incluye opciones para pruebas y depuración:
 
 ### 1. Teleoperación por Teclado
-Si deseas mover el carro manualmente para probar la física de Gazebo sin depender de Simulink, ejecuta el nodo de teleoperación en una terminal extra:
+Si deseas mover el carro manualmente para probar la física de Gazebo sin depender de Simulink, ejecuta el nodo de teleoperación en una terminal extra.
+
+**Nativo en Ubuntu (Zsh):**
+```zsh
+source install/setup.zsh
+ros2 run robot_control keyboard_teleop
+```
+
+**Contenedor en Fedora (Bash):**
 ```bash
 source install/setup.bash
 ros2 run robot_control keyboard_teleop
 ```
 *Usa las teclas W, A, S, D para mover el robot.*
 
-### 2. Simulador con Mundo Vacío
-Si quieres probar algoritmos matemáticos sin el ruido de obstáculos (por ejemplo, calibración pura de odometría), lanza el mundo vacío en lugar del principal:
+### 2. Simuladores con Mundo Vacío
+Si quieres probar algoritmos matemáticos sin el ruido de obstáculos (por ejemplo, calibración pura de odometría), lanza alguno de los mundos vacíos en lugar del principal.
+
+**Nativo en Ubuntu (Zsh):**
+```zsh
+source install/setup.zsh
+ros2 launch robot_control sim_empty_world_fricciones.launch.py  # Mundo con fricciones variadas
+# Opcionalmente:
+# ros2 launch robot_control sim_empty_world_uniform.launch.py   # Mundo uniforme
+```
+
+**Contenedor en Fedora (Bash):**
 ```bash
 source install/setup.bash
-ros2 launch robot_control sim_empty_world.launch.py
+ros2 launch robot_control sim_empty_world_fricciones.launch.py  # Mundo con fricciones variadas
+# Opcionalmente:
+# ros2 launch robot_control sim_empty_world_uniform.launch.py   # Mundo uniforme
 ```
 
 ---

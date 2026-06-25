@@ -23,7 +23,7 @@ def generate_launch_description():
         rutas.append(ruta_existente)
     rutas_gz = os.pathsep.join(rutas)
 
-    archivo_mundo = os.path.join(dir_paquete, 'worlds', 'mundo_vacio.sdf')
+    archivo_mundo = os.path.join(dir_paquete, 'worlds', 'mundo_vacio_fricciones.sdf')
     archivo_modelo = os.path.join(dir_modelos, 'nuevo_carro', 'model.sdf')
     archivo_topicos = os.path.join(dir_paquete, 'config', 'topics.yaml')
 
@@ -75,7 +75,7 @@ def generate_launch_description():
 
     topico_gz = '/model/mecanum_bot'
     topico_joint_state_gz = (
-        '/world/mundo_vacio/model/mecanum_bot/joint_state'
+        '/world/mundo_vacio_fricciones/model/mecanum_bot/joint_state'
     )
 
     puente = Node(

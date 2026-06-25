@@ -17,7 +17,8 @@ Ambos comparten este repositorio. Las respuestas y acciones de la IA deben respe
 El proyecto incluye co-simulación de un robot mecanum con MATLAB/Simulink.
 
 - Mundo principal: `src/robot_control/worlds/nuevo_mundo.sdf`.
-- Mundo vacío: `src/robot_control/launch/sim_empty_world.launch.py`.
+- Mundo vacío (Con Fricciones): `src/robot_control/launch/sim_empty_world_fricciones.launch.py`.
+- Mundo vacío (Sin Fricciones / Uniforme): `src/robot_control/launch/sim_empty_world_uniform.launch.py`.
 - Carro principal: `src/robot_control/models/nuevo_carro/model.sdf`.
 - Launch principal: `src/robot_control/launch/sim_car.launch.py`.
 - Interfaces base para MATLAB/Simulink en `robot_control/interfaces/`.
@@ -44,22 +45,23 @@ Sensores/Odometria -> estimador adaptativo -> controlador -> /cmd_vel
 ## Comandos Funcionales (Nativo - Ubuntu)
 
 Compilación:
-```bash
-source /opt/ros/jazzy/setup.bash
+```zsh
+source /opt/ros/jazzy/setup.zsh
 colcon build --symlink-install
 ```
 
 Ejecución principal:
-```bash
-source install/setup.bash
+```zsh
+source install/setup.zsh
 export QT_QPA_PLATFORM=xcb
 ros2 launch robot_control sim_car.launch.py
 ros2 run robot_control simulink_router
 ```
 
 Opciones extra:
-```bash
-ros2 launch robot_control sim_empty_world.launch.py
+```zsh
+ros2 launch robot_control sim_empty_world_fricciones.launch.py
+ros2 launch robot_control sim_empty_world_uniform.launch.py
 ros2 run robot_control keyboard_teleop
 ```
 
